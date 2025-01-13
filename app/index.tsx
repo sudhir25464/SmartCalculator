@@ -1,39 +1,52 @@
-import { StatusBar, TouchableOpacity, StyleSheet,  } from "react-native";
+import { StatusBar, TouchableOpacity, StyleSheet } from "react-native";
 import { Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useState } from "react";
-import { Modal,Alert } from "react-native";
+import { Modal, Alert } from "react-native";
+import Icon from "react-native-vector-icons/MaterialCommunityIcons"; 
 
 const Index = () => {
   const [result, setResult] = useState("0");
   const [calculation, setCalculation] = useState("");
-  
   const [modalVisible, setModalVisible] = useState(false);
+  const [backgroundColor, setBackgroundColor] = useState("#FFC300"); // Default background color
+  const [resultTextColor, setResultTextColor] = useState("#333"); // Default result text color
 
-  const [color1, setcolor]= useState("")
+  const themes = [
+    { background: "#FFC300", text: "#333" },
+    { background: "#FF5733", text: "#FFF" },
+    { background: "#C70039", text: "#FFC300" },
+    { background: "#900C3F", text: "#DAF7A6" },
+    { background: "#581845", text: "#FF33A8" },
+    { background: "#DAF7A6", text: "#C70039" },
+    { background: "#33FF57", text: "#581845" },
+    { background: "#33FFF5", text: "#900C3F" },
+    { background: "#5733FF", text: "#DAF7A6" },
+    { background: "#F533FF", text: "#FFC300" },
+    { background: "#FF33A8", text: "#FF5733" },
+    { background: "#FFA533", text: "#33FFF5" },
+  ];
 
-  const handleColorSelect = (color) => {
-    Alert.alert(`You selected ${color}`);
-    setcolor(color);
+  const handleColorSelect = (theme) => {
+    Alert.alert(`Theme selected`);
+    setBackgroundColor(theme.background);
+    setResultTextColor(theme.text);
     setModalVisible(false);
   };
-
 
   const handlePress = (button) => {
     if (button === "=") {
       try {
         setResult(eval(calculation).toString()); // Avoid eval in production; use a math parser
       } catch (error) {
-        setResult("Error");
+        setResult("");
       }
     } else if (button === "C") {
       setCalculation("");
       setResult("0");
     } else {
-      // Prevent consecutive operators
       setCalculation((prev) => {
         if (
-          ["+", "-", "*", "/"].includes(button) && 
+          ["+", "-", "*", "/"].includes(button) &&
           ["+", "-", "*", "/"].includes(prev.slice(-1))
         ) {
           return prev; // Do nothing if last character is an operator
@@ -52,63 +65,55 @@ const Index = () => {
   ];
 
   return (
-    <View className="bg-slate-300" style={styles.container}>
-          <StatusBar
-        barStyle="light-content" // Light content for dark background
-        className="bg-orange-200" // Background color of the status bar
-        translucent={false} // Ensure it is not overlapping content
-      />
-      <View style={styles.resultContainer}  className="bg-orange-200" >
-        <Text style={styles.resultText}>{result}</Text>
-        <Text style={styles.calculationText}>{calculation}</Text>
+    <View style={[styles.container, { backgroundColor }]}>
+      <StatusBar barStyle="light-content" translucent={false} />
+      <View style={styles.resultContainer}>
+        <Text style={[styles.resultText, { color: resultTextColor }]}>
+          {result}
+        </Text>
+        <Text style={[styles.calculationText, { color: resultTextColor }]}>
+          {calculation}
+        </Text>
       </View>
 
       <View style={styles.buttonsContainer}>
-
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.colorPickerContainer}>
-            <Text style={styles.modalTitle}>Choose theme</Text>
-
-            <View style={styles.colors}>
+        <Modal
+          animationType="fade"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => setModalVisible(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.colorPickerContainer}>
+              <Text style={styles.modalTitle}>Choose a Theme</Text>
+              <View style={styles.colors}>
+                {themes.map((theme, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    style={[
+                      styles.colorCircle,
+                      { backgroundColor: theme.background },
+                    ]}
+                    onPress={() => handleColorSelect(theme)}
+                  />
+                ))}
+              </View>
               <TouchableOpacity
-                style={[styles.colorCircle, { backgroundColor: 'red' }]}
-                onPress={() => handleColorSelect('Red')}
-              />
-              <TouchableOpacity
-                style={[styles.colorCircle, { backgroundColor: 'green' }]}
-                onPress={() => handleColorSelect('Green')}
-              />
-              <TouchableOpacity
-                style={[styles.colorCircle, { backgroundColor: 'blue' }]}
-                onPress={() => handleColorSelect('Blue')}
-              />
+                style={styles.closeButton}
+                onPress={() => setModalVisible(false)}
+              >
+                <Text style={styles.closeButtonText}>Close</Text>
+              </TouchableOpacity>
             </View>
-
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setModalVisible(false)}
-            >
-              <Text style={styles.closeButtonText}>X</Text>
-            </TouchableOpacity>
           </View>
-        </View>
-      </Modal>
- 
+        </Modal>
 
-        {/* Model code */}
-
-     
-        <TouchableOpacity onPress={() => setModalVisible(true)}>
-        <Text style={styles.dollarSign}>$</Text>
-      </TouchableOpacity>
-
-
+        <TouchableOpacity
+          onPress={() => setModalVisible(true)}
+          style={{ alignItems: "flex-end" }}
+        >
+             <Icon name="palette" size={40} color="#000" />
+        </TouchableOpacity>
 
         {buttons.map((row, rowIndex) => (
           <View key={rowIndex} style={styles.row}>
@@ -117,14 +122,14 @@ const Index = () => {
                 key={buttonIndex}
                 style={[
                   styles.button,
-                  button === "C" && styles.clearButton, // Add red color for "C"
+                  button === "C" && styles.clearButton,
                 ]}
                 onPress={() => handlePress(button)}
               >
                 <Text
                   style={[
                     styles.buttonText,
-                    button === "C" && styles.clearButtonText, // Optional: change text color for "C"
+                    button === "C" && styles.clearButtonText,
                   ]}
                 >
                   {button}
@@ -139,9 +144,7 @@ const Index = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+  container: { flex: 1 },
   resultContainer: {
     flex: 1,
     justifyContent: "center",
@@ -150,99 +153,43 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 20,
     borderBottomLeftRadius: 20,
   },
-  resultText: {
-    fontSize: 40,
-    fontWeight: "bold",
-    color: "#333",
-  },
-  calculationText: {
-    fontSize: 24,
-    color: "#888",
-  },
-  buttonsContainer: {
-    flex: 2,
-    padding: 10,
-  },
-  row: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    marginBottom: 20,
-  },
+  resultText: { fontSize: 50, fontWeight: "bold" },
+  calculationText: { fontSize: 24 },
+  buttonsContainer: { flex: 2, padding: 10, marginBottom: 5 },
+  row: { flexDirection: "row", justifyContent: "space-around", marginBottom: 13 },
   button: {
-    backgroundColor: "#d2d2d1",
+    backgroundColor: "#ecb89d",
     padding: 30,
-    borderRadius: 50, // Retain your current design
+    borderRadius: 50,
     flex: 1,
     marginHorizontal: 5,
     justifyContent: "center",
     alignItems: "center",
   },
-  buttonText: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#333",
-  },
-  clearButton: {
-    backgroundColor: "red", // Red color for "C"
-  },
-  clearButtonText: {
-    color: "#fff", // Optional: white text for "C"
-  },
-
-  // Model color picker
-  container2: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  dollarSign: {
-    fontSize: 40,
-    fontWeight: 'bold',
-    color: '#000',
-  },
+  buttonText: { fontSize: 24, fontWeight: "bold", color: "#333" },
+  clearButton: { backgroundColor: "red" },
+  clearButtonText: { color: "#fff" },
+  dollarSign: { fontSize: 40, fontWeight: "bold", color: "#000" },
   modalOverlay: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   colorPickerContainer: {
     width: 400,
     height: 300,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     padding: 20,
     borderRadius: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  colors: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: '100%',
-    marginBottom: 20,
-  },
-  colorCircle: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    borderWidth: 2,
-    borderColor: '#000',
-  },
-  closeButton: {
-    marginTop: 10,
-    backgroundColor: '#ccc',
-    padding: 10,
-    borderRadius: 5,
-  },
-  closeButtonText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
+  modalTitle: { fontSize: 20, fontWeight: "bold", marginBottom: 20 },
+  colors: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-around", width: "100%", marginBottom: 20 },
+  colorCircle: { width: 40, height: 40, borderRadius: 20, borderWidth: 2, borderColor: "#000", margin: 5 },
+  closeButton: {width:"100%", justifyContent:"center", alignItems:"center", marginTop: 10, backgroundColor: "#dddd", padding: 10, borderRadius: 5 },
+  closeButtonText: { fontSize: 16, fontWeight: "bold" },
 });
 
 export default Index;
